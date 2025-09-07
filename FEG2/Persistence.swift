@@ -6,52 +6,59 @@
 //
 
 import CoreData
+import SwiftUI
 
 struct PersistenceController {
     static let shared = PersistenceController()
 
-    @MainActor
-    static let preview: PersistenceController = {
-        let result = PersistenceController(inMemory: true)
-        let viewContext = result.container.viewContext
-        for _ in 0..<10 {
-            let newItem = Item(context: viewContext)
-            newItem.timestamp = Date()
-        }
-        do {
-            try viewContext.save()
-        } catch {
-            // Replace this implementation with code to handle the error appropriately.
-            // fatalError() causes the application to generate a crash log and terminate. You should not use this function in a shipping application, although it may be useful during development.
-            let nsError = error as NSError
-            fatalError("Unresolved error \(nsError), \(nsError.userInfo)")
-        }
-        return result
-    }()
-
     let container: NSPersistentContainer
 
-    init(inMemory: Bool = false) {
+    init() {
         container = NSPersistentContainer(name: "FEG2")
-        if inMemory {
-            container.persistentStoreDescriptions.first!.url = URL(fileURLWithPath: "/dev/null")
-        }
         container.loadPersistentStores(completionHandler: { (storeDescription, error) in
             if let error = error as NSError? {
-                // Replace this implementation with code to handle the error appropriately.
-                // fatalError() causes the application to generate a crash log and terminate. You should not use this function in a shipping application, although it may be useful during development.
-
-                /*
-                 Typical reasons for an error here include:
-                 * The parent directory does not exist, cannot be created, or disallows writing.
-                 * The persistent store is not accessible, due to permissions or data protection when the device is locked.
-                 * The device is out of space.
-                 * The store could not be migrated to the current model version.
-                 Check the error message to determine what the actual problem was.
-                 */
                 fatalError("Unresolved error \(error), \(error.userInfo)")
             }
         })
         container.viewContext.automaticallyMergesChangesFromParent = true
     }
+    
+    var context: NSManagedObjectContext {
+        return container.viewContext
+    }
+    
+    func keepData(list_f: [Float], list_s: [Float]) {
+        let newProfile = ProfileEntity(context: context)
+        newProfile.name = ""
+        newProfile.desc = ""
+        newProfile.createAt = Date()
+        
+        do {
+            try context.save()
+        } catch {
+            fatalError(error.localizedDescription)
+        }
+        
+        list_f.enumerated().forEach { intex, value in
+            let temp_f_encoded = Constants.encodeTemp(temp: value)
+            let temp_s_encoded = Constants.encodeTemp(temp: list_s[intex])
+            let newChart = ChartEntity(context: context)
+            newChart.profile = newProfile
+            newChart.point_index = Int16(intex)
+            newChart.temp = Constants.packTemp(temp_f: temp_f_encoded, temp_s: temp_s_encoded)
+        }
+        
+        do {
+            try context.save()
+        } catch {
+            fatalError(error.localizedDescription)
+        }
+    }
 }
+
+//extension ProfileEntity {
+//    var chartArray: [ChartEntity] {
+//        let set = charts as? Set<ChartEntity> ?? []
+//        return set.sorted { $0.point_index < $1.point_index }
+//    }
+//}

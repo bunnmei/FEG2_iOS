@@ -1,0 +1,35 @@
+# Xcode
+#
+# ビルド生成物
+build/
+DerivedData/
+
+# ユーザー固有のファイル
+*.pbxuser
+*.xcworkspace/xcuserdata/
+xcuserdata/
+
+# プロジェクトの自動生成ファイル
+.DS_Store
+
+# macOSが生成する一時ファイル
+.vscode/ # VS Codeなど、他のエディタで開いた場合に生成されるファイル
+.swiftpm/
+
+# CocoaPods関連
+# Podsディレクトリは通常、リポジトリに含めない
+Pods/
+
+# Carthage関連
+# Carthageがビルドしたライブラリは通常、リポジトリに含めない
+Carthage/Build/
+
+# その他のファイル
+*.ipa
+*.dSYM.zip
+*.dSYM
+
+# Fastlane関連
+# Fastlaneの設定ファイルは含めるべきだが、環境変数などを除外する
+# fastlane/report.xml
+# fastlane/screenshots/
