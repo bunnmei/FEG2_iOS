@@ -28,18 +28,13 @@ struct PersistenceController {
     }
     
     func keepData(list_f: [Float], list_s: [Float]) {
+        
         let newProfile = ProfileEntity(context: context)
         newProfile.name = ""
         newProfile.desc = ""
         newProfile.createAt = Date()
-        
-        do {
-            try context.save()
-        } catch {
-            fatalError(error.localizedDescription)
-        }
-        
         list_f.enumerated().forEach { intex, value in
+            guard intex < list_s.count else { return }
             let temp_f_encoded = Constants.encodeTemp(temp: value)
             let temp_s_encoded = Constants.encodeTemp(temp: list_s[intex])
             let newChart = ChartEntity(context: context)
@@ -53,6 +48,8 @@ struct PersistenceController {
         } catch {
             fatalError(error.localizedDescription)
         }
+    
+        
     }
 }
 

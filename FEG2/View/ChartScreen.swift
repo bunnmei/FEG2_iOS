@@ -19,6 +19,13 @@ struct ChartScreen: View {
     @State var temp_s_list_w: [Float] = []
     
     var body: some View {
+        if (chartState.data_keeped == .KEEPING) {
+            VStack {
+                Text("保存中")
+                ProgressView()
+                    .progressViewStyle(CircularProgressViewStyle())
+            }
+        } else {
         TabHide(
         content: {
             ZStack{
@@ -45,6 +52,8 @@ struct ChartScreen: View {
         .onAppear {
             print("chart Screen onAppear")
             fetchData()
+        }
+            
         }
         
     }

@@ -10,15 +10,30 @@ import CoreData
 
 struct EditBtns: View {
     var profile: ProfileEntity
+    @Binding var deleteState: ProfileDelete
     
     @AppStorage("bookmarkProfileId") private var profileId: String = ""
+    @Environment(\.managedObjectContext) private var viewContext
     
     var body: some View {
         let isBookmarked: Bool = profileId == profile.objectID.uriRepresentation().absoluteString
         HStack {
             Spacer()
             VStack(spacing: 16){
-                Button(action: {}) {
+                Button(action: {
+                    deleteState = .DELETING
+                    viewContext.delete(profile)
+                    do {
+                        try viewContext.save()
+                        if isBookmarked {
+                            profileId = ""
+                        }
+                    deleteState = .DELETED
+                    
+                   } catch {
+                       print("削除エラー:", error)
+                   }
+                }) {
                     Image(systemName: "trash")
                         .foregroundStyle(.onMain)
                 }

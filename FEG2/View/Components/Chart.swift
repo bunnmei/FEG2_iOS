@@ -15,9 +15,6 @@ struct OffsetPreferenceKey: PreferenceKey {
 }
 
 struct Chart: View {
-    
-//    @EnvironmentObject var scrollOffset: MinuteMemoryScroll
-    
     @Binding var temp_f_list: [Float]
     @Binding var temp_s_list: [Float]
     @Binding var temp_f_list_watermark: [Float]
@@ -42,14 +39,10 @@ struct Chart: View {
                         temp_f_list: temp_f_list_watermark, temp_s_list: temp_s_list_watermark,
                         opaci: 0.5
                     )
-                    
-//                    let height = Float(geometry.size.height)
-//                    let one_heignt = height / 500
                 }.frame(
-                    width: CGFloat(Constants.oneMinute*30+60),
+                    width: CGFloat(Constants.oneMinute*Constants.maxMinute + (Constants.oneMinute/2)),
                     height: geometry.size.height
                 )
-//                .background(.black)
                 .background(GeometryReader {
                     Color.clear.preference(
                         key: OffsetPreferenceKey.self,
@@ -58,7 +51,6 @@ struct Chart: View {
                 })
             }.onPreferenceChange(OffsetPreferenceKey.self) { offset in
                 scrollOffset = offset
-//                scrollOffset.scrollOffset = offset
             }
         }
     }

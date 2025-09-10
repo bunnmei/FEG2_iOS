@@ -16,6 +16,12 @@ enum  BLE_CON_STATUS {
    case DISCONNECTED
 }
 
+enum BLE_WIRTE_TYPE {
+    case TEMP_F
+    case TEMP_S
+    case BRIGHTNESS
+}
+
 class BluetoothLEController: NSObject, ObservableObject {
     @Published var temp_f: Float = 0.0
     @Published var temp_s: Float = 0.0
@@ -24,6 +30,10 @@ class BluetoothLEController: NSObject, ObservableObject {
     
     private var centralManager: CBCentralManager?
     private var peripheral: CBPeripheral?
+    
+    private var brightness_characteristic: CBCharacteristic?
+    private var carib_f_characteristic: CBCharacteristic?
+    private var carib_s_characteristic: CBCharacteristic?
     
     private var notTargetDevices: [String] = []
     
@@ -84,20 +94,24 @@ extension BluetoothLEController: CBCentralManagerDelegate {
     func disconnect() {
         guard let peripheral = self.peripheral else { return }
         centralManager?.cancelPeripheralConnection(peripheral)
+        self.carib_f_characteristic = nil
+        self.carib_s_characteristic = nil
+        self.brightness_characteristic = nil
         bleState = .DISCONNECTED
     }
     
     //scanで端末が見つかると、呼ばれるコールバック
     func centralManager(_ central: CBCentralManager, didDiscover peripheral: CBPeripheral, advertisementData: [String: Any], rssi RSSI: NSNumber) {
         
+    if let manufacturerData = advertisementData[CBAdvertisementDataManufacturerDataKey] as? Data {
+                print("Manufacturer Data: \(manufacturerData.hexEncodedString())")
+            }
         let localName = advertisementData[CBAdvertisementDataLocalNameKey]
 //        print("Peripheralデバイスを発見しました: \(peripheral.name ?? "名前不明") - RSSI: \(RSSI) Local Name - \(localName ?? "null")")
         
         if localName != nil {
             let device_name = localName as! String
             if(!notTargetDevices.contains(device_name)){
-                
-//                notTargetDevices.append(device_name)
                 self.peripheral = peripheral
                 centralManager?.connect(peripheral, options: nil)
                 central.stopScan()
@@ -128,6 +142,8 @@ extension BluetoothLEController: CBPeripheralDelegate {
             print("サービス UUID: \(service.uuid)")
             if service.uuid == CBUUID(string: Constants.SERVICE_UUID) {
                 print("サービスが見つかりました。目的のデバイスです。")
+                
+//                ble_device_address = peripheral.identifier.uuidString
                 peripheral.discoverCharacteristics(nil, for: service)
                 
                 return
@@ -135,6 +151,10 @@ extension BluetoothLEController: CBPeripheralDelegate {
         }
         
         print(#function, "目的のサービスが見つかりません。")
+        if (peripheral.name != nil) {
+            notTargetDevices.append(peripheral.name!)
+        }
+        
         disconnect()
         scan_start()
     }
@@ -153,6 +173,16 @@ extension BluetoothLEController: CBPeripheralDelegate {
             }
             if characteristic.uuid == CBUUID(string: Constants.CHARACTERISTIC_UUID_S) {
                 peripheral.setNotifyValue(true, for: characteristic)
+            }
+            if characteristic.uuid == CBUUID(string: Constants.CHARACTERISTIC_UUID_BRIGHTNESS) {
+                print("brightness found chara")
+                self.brightness_characteristic = characteristic
+            }
+            if characteristic.uuid == CBUUID(string: Constants.CHARACTERISTIC_UUID_F_CARIB) {
+                self.carib_f_characteristic = characteristic
+            }
+            if characteristic.uuid == CBUUID(string: Constants.CHARACTERISTIC_UUID_S_CARIB) {
+                self.carib_s_characteristic = characteristic
             }
         }
         
@@ -184,5 +214,43 @@ extension BluetoothLEController: CBPeripheralDelegate {
         }
     }
     
+    func peripheral(_ peripheral: CBPeripheral, didWriteValueFor characteristic: CBCharacteristic, error: Error?) {
+        if let error = error {
+            print("Write failed: \(error)")
+        } else {
+            print("Write success!")
+        }
+    }
     
+    func writeData(emitValue: Int, type: BLE_WIRTE_TYPE) {
+        if (carib_f_characteristic == nil || carib_s_characteristic == nil || brightness_characteristic == nil) {
+            print("characteristic nil")
+            return } else {
+            print("characteristic exist")
+        }
+        if (peripheral != nil) {
+            switch type {
+            case .TEMP_F:
+                let data: Data = withUnsafeBytes(of: emitValue) { Data($0) }
+                peripheral?.writeValue(data, for: carib_f_characteristic!, type: .withResponse)
+            case .TEMP_S:
+                let data: Data = withUnsafeBytes(of: emitValue) { Data($0) }
+                peripheral?.writeValue(data, for: carib_s_characteristic!, type: .withResponse)
+            case .BRIGHTNESS:
+//                print("write brightness")
+                let data: Data = withUnsafeBytes(of: emitValue) { Data($0) }
+                if brightness_characteristic!.properties.contains(.write) {
+                    // 書き込み可能
+                    peripheral?.writeValue(data, for: brightness_characteristic!, type: .withResponse)
+                }
+                
+            }
+        }
+    }
+}
+
+extension Data {
+    func hexEncodedString() -> String {
+        return map { String(format: "%02hhX", $0) }.joined()
+    }
 }

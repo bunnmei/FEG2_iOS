@@ -12,11 +12,10 @@ struct MinuteMemory: View {
     @Binding var scrollOffset: CGFloat
     
     private let screenSize = UIScreen.main.bounds
-    
     var body: some View {
         ScrollView(.horizontal, showsIndicators: false){
             Canvas { context, size in
-                for n in 0...Constants.maxMinute {
+                for n in 0...Int(Constants.maxMinute) {
                     
                     let m_x = CGFloat((CGFloat(n)+1)*Constants.oneMinute)
                     let m_path = Path { path in

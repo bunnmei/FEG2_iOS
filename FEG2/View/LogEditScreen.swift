@@ -7,6 +7,8 @@
 
 import SwiftUI
 
+
+
 struct LogEditScreen: View {
     var profile: ProfileEntity
     
@@ -14,13 +16,12 @@ struct LogEditScreen: View {
     @State var desc: String = ""
     @FocusState private var focused: Bool
     @FocusState private var focused2: Bool
-    
+
     @Environment(\.managedObjectContext) private var viewContext
     @Environment(\.presentationMode) var presentationMode
     let screenSize = UIScreen.main.bounds
     
     var body: some View {
-//        Text("LogEditScreen")
         VStack {
             VStack {
                 HStack(spacing: 4) {
@@ -53,7 +54,7 @@ struct LogEditScreen: View {
                 TextField(text: $title) {
                     Text("Profile Title")
                 }
-                .padding(8)
+                .padding(16)
                 .tint(.main)
                 .overlay(
                     RoundedRectangle(cornerRadius: 8)
@@ -71,7 +72,7 @@ struct LogEditScreen: View {
                     profile.desc = desc
                     try? viewContext.save()
                 }
-                .frame(height: 80, alignment: .topLeading)
+                .frame(height: 84, alignment: .topLeading)
                 .tint(.main)
                 .padding(16)
                 .overlay(
@@ -116,5 +117,6 @@ struct LogEditScreen: View {
             title = profile.name!
             desc = profile.desc!
         }
+            
     }
 }

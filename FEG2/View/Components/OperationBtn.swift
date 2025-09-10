@@ -21,50 +21,6 @@ struct OperationBtn: View {
         ){
             HStack {
                 VStack (spacing: 16){
-//                    ForEach(OperationBtnItem.allCases, id:  \.self) { item in
-//                        
-//                        Button(action: {
-//                            switch item {
-//                                case .bluetooth: self.bleController.scan_start()
-//                                    break
-//                                case .play: self.stopWatch.stopOrStart()
-//                                    break
-//                                case .keep: self.chatState.keep_db()
-//                                    break
-//                                case .clear:
-//                                    self.stopWatch.stopOrStart(resetFlug: true)
-//                                    self.chatState.list_clear()
-//                                    break
-//                            }
-////                            print("clicked ope")
-//                        }) {
-//                            if (item.icon != nil) {
-//                                Image(systemName: item.icon!)
-//                                    .foregroundStyle(Color.onMain)
-//                            } else {
-//                                switch bleController.bleState {
-//                                    case .CONNECTED:
-//                                    Bluetooth_Connected().frame(width:24, height:24).foregroundStyle(.onMain)
-//                                        .offset(x: 0, y: 24)
-//                                    case .SCANNING:
-//                                    Bluetooth_Search().frame(width:24, height:24).foregroundStyle(.onMain)
-//                                        .offset(x: 0, y: 24)
-//                                    default:
-//                                    Bluetooth().frame(width:24, height:24).foregroundStyle(.onMain)
-//                                        .offset(x: 0, y: 24)
-//                                }
-//                                
-//                            }
-//                            
-//                        }
-//                        .frame(width: 50, height: 50)
-//                        .background(.main)
-//                        .clipShape(Circle())
-//                        .scaleEffect(buttonShow ? 1.0 : 0.0)
-//                        .animation(.easeInOut(duration: 0.15), value: buttonShow)
-//                        
-//                    }
-//
                     Button(action: {
                         bleController.scanOrDissconect()
                     }){
@@ -112,11 +68,14 @@ struct OperationBtn: View {
                     }){
                         Image(systemName: "arrow.down.to.line")
                             .foregroundStyle(
-                                !chatState.data_keeped && stopWatch.StopWatchState == .PAUSED ?
+                                chatState.data_keeped == .NOT_KEEPED &&
+                                stopWatch.StopWatchState == .PAUSED ?
                                     .onMain : .onDisAble)
                     }
                     .frame(width: 50, height: 50)
-                    .background(!chatState.data_keeped && stopWatch.StopWatchState == .PAUSED ?
+                    .background(
+                        chatState.data_keeped == .NOT_KEEPED &&
+                        stopWatch.StopWatchState == .PAUSED ?
                         .main : .disAble)
                     .clipShape(Circle())
                     .scaleEffect(buttonShow ? 1.0 : 0.0)

@@ -19,7 +19,7 @@ struct ProfileCard: View {
     var body: some View {
         let isBookmark: Bool = profileId == id ? true : false
         VStack {
-            VStack(alignment: .leading) {
+            VStack(alignment: .leading, spacing: 0) {
                 HStack {
                     Spacer().frame(width: 16)
                     Text(title == "" ? "No Name" : title)
@@ -44,21 +44,23 @@ struct ProfileCard: View {
                             }
                     )
                 }.frame(height: 50)
-                
-                HStack{
+                VStack(spacing: 0){
                     Text(desc == "" ? "No Description" : desc)
                         .foregroundStyle(.gray)
                         .multilineTextAlignment(.leading)
+                        .lineLimit(3)
+                        .lineSpacing(8)
+                    Spacer()
                 }
+                .frame(maxHeight: .infinity, alignment: .center)
                 .padding([.leading, .trailing], 16)
-                
-                Spacer()
                 HStack {
                     Spacer()
                     Text("\(dateFormatter.string(from: date))")
                         .foregroundStyle(.onBg)
                     Spacer().frame(width: 16)
                 }.frame(height: 50)
+                
             }
             .frame(width: screenSize.width-32, height: (screenSize.width-32) * (9 / 16))  //16:9
             .background(.card)
@@ -75,3 +77,15 @@ struct ProfileCard: View {
        return formatter
     }()
 }
+//______________
+//|             |
+//| moziretu    |
+//| moziretu    |
+//| moziretu    |
+//|             |
+//|_____________|
+//
+//_VStack{
+
+//}
+//
