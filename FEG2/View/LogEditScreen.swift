@@ -22,6 +22,9 @@ struct LogEditScreen: View {
     let screenSize = UIScreen.main.bounds
     
     var body: some View {
+        ScrollView {
+            
+      
         VStack {
             VStack {
                 HStack(spacing: 4) {
@@ -102,11 +105,11 @@ struct LogEditScreen: View {
                 date: Date(),
                 id: ""
             )
-            
+            Spacer().frame(height: 50)
             Spacer()
         }
         .navigationBarBackButtonHidden(true)
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+        .frame(maxWidth: Constants.maxWidth, maxHeight: .infinity, alignment: .top)
         .contentShape(Rectangle())
         .background(Color.clear)
         .onTapGesture {
@@ -118,5 +121,7 @@ struct LogEditScreen: View {
             desc = profile.desc!
         }
             
+    
+        }
     }
 }

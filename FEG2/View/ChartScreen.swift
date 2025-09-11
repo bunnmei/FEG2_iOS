@@ -26,33 +26,34 @@ struct ChartScreen: View {
                     .progressViewStyle(CircularProgressViewStyle())
             }
         } else {
-        TabHide(
-        content: {
-            ZStack{
-                Chart(
-                    temp_f_list: $chartState.temp_f_list,
-                    temp_s_list: $chartState.temp_s_list,
-                    temp_f_list_watermark: $temp_f_list_w,
-                    temp_s_list_watermark: $temp_s_list_w,
-                    scrollOffset: $scrollOffset
-                )
-                TempMemory()
-                StatusPanel()
+            
+            TabHide(
+            content: {
+                ZStack{
+                    Chart(
+                        temp_f_list: $chartState.temp_f_list,
+                        temp_s_list: $chartState.temp_s_list,
+                        temp_f_list_watermark: $temp_f_list_w,
+                        temp_s_list_watermark: $temp_s_list_w,
+                        scrollOffset: $scrollOffset
+                    )
+                    TempMemory()
+                    StatusPanel()
+                }
+            },
+            tabOnContent: {
+                MinuteMemory(scrollOffset: $scrollOffset)
+                OperationBtn()
+            })
+            .onChange(of: profileId) {
+                temp_f_list_w.removeAll()
+                temp_s_list_w.removeAll()
+                fetchData()
             }
-        },
-        tabOnContent: {
-            MinuteMemory(scrollOffset: $scrollOffset)
-            OperationBtn()
-        })
-        .onChange(of: profileId) {
-            temp_f_list_w.removeAll()
-            temp_s_list_w.removeAll()
-            fetchData()
-        }
-        .onAppear {
-            print("chart Screen onAppear")
-            fetchData()
-        }
+            .onAppear {
+                print("chart Screen onAppear")
+                fetchData()
+            }
             
         }
         

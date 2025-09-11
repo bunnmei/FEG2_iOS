@@ -38,8 +38,8 @@ class StopWatchController: ObservableObject {
     
     func stopOrStart(resetFlug: Bool = false){
         switch StopWatchState {
-            case .STOPED: start()
-            case .STARTED: pause()
+        case .STOPED: if(!resetFlug) {start()}
+        case .STARTED: if(!resetFlug) {pause()}
             case .PAUSED:
                 if resetFlug {
                     reset()
@@ -118,6 +118,10 @@ class StopWatchController: ObservableObject {
                 //  一秒ごとに実行する処理
                 chartState.add_temps(f: bleController.temp_f, s: bleController.temp_s)
                 print("length \(chartState.temp_f_list.count)")
+                if(self.seconds >= 1800) {
+                    self.pause()
+                    chartState.keep_db()
+                }
             }
 
            timeString = String(format: "%02d:%02d.%02d", minutes, seconds, centiseconds)

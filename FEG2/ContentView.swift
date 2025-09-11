@@ -23,7 +23,7 @@ class CurrentScreen: ObservableObject {
 struct ContentView: View {
     @Environment(\.managedObjectContext) private var viewContext
     
-    @State var currentTab: BottomNavItem = .settings
+    @State var currentTab: BottomNavItem = .graph
     
     @StateObject var tabOffset: TabOffset = TabOffset()
 //    @StateObject var minuteMemoryScroll = MinuteMemoryScroll()
@@ -48,19 +48,7 @@ struct ContentView: View {
         
         CustomTab(
             currentTab: $currentTab,
-            tabOffset: $tabOffset.tabOffset,
-            tabOnContent: {
-//                if(currentTab == .graph) {
-//                    ZStack(
-//                        alignment: .bottom
-//                    ) {
-//                        MinuteMemory(scrollOffset: $minuteMemoryScroll.scrollOffset)
-//                        OperationBtn()
-//                    }.onTapGesture {
-//                        print("taped tabOncontent")
-//                    }
-//                }
-            }
+            tabOffset: $tabOffset.tabOffset
         ){
             ZStack {
                 

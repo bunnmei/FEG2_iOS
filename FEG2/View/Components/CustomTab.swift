@@ -6,21 +6,18 @@
 //
 import SwiftUI
 
-struct CustomTab<TabOnContent: View, Content: View>: View {
+struct CustomTab<Content: View>: View {
     @Binding var currentTab: BottomNavItem
     @Binding var tabOffset: CGFloat
-    var tabOnContent: TabOnContent
     var content: Content
     
     init(
         currentTab: Binding<BottomNavItem>,
         tabOffset: Binding<CGFloat>,
-        @ViewBuilder tabOnContent: () -> TabOnContent = { EmptyView() },
         @ViewBuilder content: () -> Content
     ){
         self._tabOffset = tabOffset
         self._currentTab = currentTab
-        self.tabOnContent = tabOnContent()
         self.content = content()
     }
     

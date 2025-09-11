@@ -12,14 +12,12 @@ struct LogListScreen: View {
     
     @FetchRequest(sortDescriptors: [NSSortDescriptor(keyPath: \ProfileEntity.createAt, ascending: false)])
     var profiles: FetchedResults<ProfileEntity>
-    
-    
-    let screenSize = UIScreen.main.bounds
     var body: some View {
             VStack(spacing: 0) {
                 NavigationStack {
                     ScrollView {
                         VStack(spacing: 16) {
+                            Spacer()
                             ForEach(profiles) { profile in
                                 NavigationLink{
                                     LogDetailScreen(profile: profile)
@@ -33,11 +31,11 @@ struct LogListScreen: View {
                                 }
                             }
                             Spacer().frame(height: 50)
-                        }
+                        }.frame(maxWidth: Constants.maxWidth)
                     }
 //                    .background(.green)
                 }
-            }.frame(maxWidth: .infinity, maxHeight: .infinity)
+            }
         
     }
 }

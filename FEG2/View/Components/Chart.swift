@@ -49,8 +49,10 @@ struct Chart: View {
                         value: $0.frame(in: .global).origin.x
                     )
                 })
-            }.onPreferenceChange(OffsetPreferenceKey.self) { offset in
-                scrollOffset = offset
+            }
+//            .frame(width: geometry.size.width, height: geometry.size.height)
+            .onPreferenceChange(OffsetPreferenceKey.self) { offset in
+                scrollOffset = offset - geometry.safeAreaInsets.leading
             }
         }
     }

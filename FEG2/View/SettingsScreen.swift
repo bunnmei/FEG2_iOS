@@ -126,10 +126,11 @@ struct SettingsScreen: View {
                 Spacer().frame(height: 50+16)
                 Spacer()
                     .id("BOTTOM")
-            }.padding([.leading, .trailing, .top], 16)
+            }
+            .padding([.leading, .trailing, .top], 16)
             
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .frame(maxWidth: Constants.maxWidth, maxHeight: .infinity)
         .contentShape(Rectangle())
         .background(Color.clear)
         .onTapGesture {

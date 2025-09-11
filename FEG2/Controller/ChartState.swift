@@ -27,6 +27,7 @@ class ChartState: ObservableObject {
 //        print("rr \(rounded_f)")
         temp_f_list.append(rounded_f)
         temp_s_list.append(rounded_s)
+        
     }
     
     func list_clear() {

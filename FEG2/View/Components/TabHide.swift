@@ -45,9 +45,9 @@ struct TabHide<Content: View, TabOnContent: View,>: View {
         
                     Spacer()
                         .frame(height: tabOffset.tabOffset >= 50 ? 0: tabOffset.tabOffset + 50)
-
                 }
-            }.animation(.easeInOut(duration: 0.2), value: tabOffset.tabOffset)
+            }
+            .animation(.easeInOut(duration: 0.2), value: tabOffset.tabOffset)
         }
     }
 }

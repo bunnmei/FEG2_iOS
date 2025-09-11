@@ -40,7 +40,9 @@ struct TempMemory: View {
                 }
             }.frame(width:Constants.memoryWidth, height:geometry.size.height)
 //                .background(.pink)
-        }.allowsHitTesting(false)
+        }
+      
+        .allowsHitTesting(false)
     }
     
     func getOneMemoryHeight(height:Float, range:Int) -> Float {

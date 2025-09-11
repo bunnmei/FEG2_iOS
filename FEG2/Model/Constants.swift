@@ -12,6 +12,7 @@ enum Constants {
     static let oneMinute: CGFloat = 120
     static let memoryWidth: CGFloat = 50
     static let maxMinute: CGFloat = 30
+    static let maxWidth: CGFloat = 600
     static let SERVICE_UUID = "811b864d-718c-b035-804d-92c4761243c0"
     static let CHARACTERISTIC_UUID_F = "0601a001-0eca-b5ab-edc2-887fd5f32b84"
     static let CHARACTERISTIC_UUID_S = "620321e5-17c6-ca12-8328-7db87b02fbe5"

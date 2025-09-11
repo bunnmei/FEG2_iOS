@@ -73,7 +73,7 @@ struct LogDetailScreen: View {
                             .foregroundStyle(.main)
                         Spacer()
                     }
-                    .frame(width: screenSize.width, height: 50)
+                    .frame(height: 50)
                     .background(.clear)
                     .contentShape(Rectangle())
                     .onTapGesture {
