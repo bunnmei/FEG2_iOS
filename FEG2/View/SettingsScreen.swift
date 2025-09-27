@@ -95,9 +95,15 @@ struct SettingsScreen: View {
                     }
     //                .background(.pink.opacity(0.2))
                 }
-                
-                
-//                
+                SettingPanel(desc: "BLEデバイス") {
+                    Spacer().frame(height: 16)
+                    HStack {
+                        Text(bleController.deviceName)
+                        Spacer()
+                    }
+                    Spacer().frame(height: 16)
+                }
+            
                 SettingPanel(desc: "7セグの明るさ:\(sliderVal)") {
                     Slider(value: Binding(
                         get: { Double(sliderVal) }, // Int を Double に変換

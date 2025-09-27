@@ -27,6 +27,7 @@ class BluetoothLEController: NSObject, ObservableObject {
     @Published var temp_s: Float = 0.0
     @Published var bleState: BLE_CON_STATUS = .DISCONNECTED
     @Published var bluetooth_ON: Bool = false
+    @Published var deviceName: String = "デバイス未接続"
     
     private var centralManager: CBCentralManager?
     private var peripheral: CBPeripheral?
@@ -122,9 +123,15 @@ extension BluetoothLEController: CBCentralManagerDelegate {
     func centralManager(_ central: CBCentralManager, didConnect peripheral: CBPeripheral) {
         print("Peripheralデバイスと接続しました: \(peripheral.name ?? "名前不明")")
         peripheral.delegate = self
-        peripheral.discoverServices(nil)
+        peripheral.discoverServices([
+            CBUUID(string: "180A"),
+            CBUUID(string: Constants.SERVICE_UUID)
+        ])
     }
     
+//    func peripheralDidUpdateName(_ peripheral: CBPeripheral){
+//        print(\(peripheral.))
+//    }
 }
 
 extension BluetoothLEController: CBPeripheralDelegate {
@@ -138,13 +145,25 @@ extension BluetoothLEController: CBPeripheralDelegate {
         guard let services = peripheral.services else { return }
         print("サービス数: \(services.count)")
         
+        var targetServiceCount = 0
+        
         for service in services {
             print("サービス UUID: \(service.uuid)")
-            if service.uuid == CBUUID(string: Constants.SERVICE_UUID) {
-                print("サービスが見つかりました。目的のデバイスです。")
-                
-//                ble_device_address = peripheral.identifier.uuidString
+            // check version name
+            
+            // check device name
+            if service.uuid == CBUUID(string: "180A") {
+                print("180A")
+                targetServiceCount += 1
                 peripheral.discoverCharacteristics(nil, for: service)
+            }
+            if service.uuid == CBUUID(string: Constants.SERVICE_UUID) {
+                targetServiceCount += 1
+                print("サービスが見つかりました。目的のデバイスです。")
+                peripheral.discoverCharacteristics(nil, for: service)
+            }
+            print("\(targetServiceCount)")
+            if targetServiceCount >= 2 {
                 
                 return
             }
@@ -167,26 +186,36 @@ extension BluetoothLEController: CBPeripheralDelegate {
         }
         guard let characteristics = service.characteristics else { return }
         
-        for characteristic in characteristics {
-            if characteristic.uuid == CBUUID(string: Constants.CHARACTERISTIC_UUID_F) {
-                peripheral.setNotifyValue(true, for: characteristic)
-            }
-            if characteristic.uuid == CBUUID(string: Constants.CHARACTERISTIC_UUID_S) {
-                peripheral.setNotifyValue(true, for: characteristic)
-            }
-            if characteristic.uuid == CBUUID(string: Constants.CHARACTERISTIC_UUID_BRIGHTNESS) {
-                print("brightness found chara")
-                self.brightness_characteristic = characteristic
-            }
-            if characteristic.uuid == CBUUID(string: Constants.CHARACTERISTIC_UUID_F_CARIB) {
-                self.carib_f_characteristic = characteristic
-            }
-            if characteristic.uuid == CBUUID(string: Constants.CHARACTERISTIC_UUID_S_CARIB) {
-                self.carib_s_characteristic = characteristic
+        if service.uuid == CBUUID(string: "180A") {
+            for characteristic in characteristics {
+                if characteristic.uuid == CBUUID(string: "2A26") {
+                    peripheral.readValue(for: characteristic)
+                }
             }
         }
-        
-        bleState = .CONNECTED
+        if service.uuid == CBUUID(string: Constants.SERVICE_UUID) {
+            for characteristic in characteristics {
+                if characteristic.uuid == CBUUID(string: Constants.CHARACTERISTIC_UUID_F) {
+                    peripheral.setNotifyValue(true, for: characteristic)
+                }
+                if characteristic.uuid == CBUUID(string: Constants.CHARACTERISTIC_UUID_S) {
+                    peripheral.setNotifyValue(true, for: characteristic)
+                }
+                if characteristic.uuid == CBUUID(string: Constants.CHARACTERISTIC_UUID_BRIGHTNESS) {
+                    print("brightness found chara")
+                    self.brightness_characteristic = characteristic
+                }
+                if characteristic.uuid == CBUUID(string: Constants.CHARACTERISTIC_UUID_F_CARIB) {
+                    self.carib_f_characteristic = characteristic
+                }
+                if characteristic.uuid == CBUUID(string: Constants.CHARACTERISTIC_UUID_S_CARIB) {
+                    self.carib_s_characteristic = characteristic
+                }
+            }
+            
+            print("connected device name \(peripheral.name ?? "")")
+            bleState = .CONNECTED
+        }
     }
     
     func peripheral(_ peripheral: CBPeripheral, didUpdateValueFor characteristic: CBCharacteristic, error: Error?) {
@@ -199,19 +228,37 @@ extension BluetoothLEController: CBPeripheralDelegate {
             print("Characteristicの値が存在しません")
             return
         }
-    
-        
-        let floatData = data[4..<8]
-        let value = floatData.withUnsafeBytes { $0.load(as: Float.self) }
-        print("\(value)")
         
         if characteristic.uuid == CBUUID(string: Constants.CHARACTERISTIC_UUID_F) {
-            print("f char callback")
-            self.temp_f = value
+            guard let value: Float = floatFromData(data) else {
+                return
+            }
+            print("\(value)")
+            if (!value.isNaN) {
+                self.temp_f = value
+            } else {
+                self.temp_f = 0.0
+            }
+            
         }
         if characteristic.uuid == CBUUID(string: Constants.CHARACTERISTIC_UUID_S) {
-            self.temp_s = value
+            guard let value: Float = floatFromData(data) else {
+                return
+            }
+            if (!value.isNaN) {
+                self.temp_s = value
+            } else {
+                self.temp_s = 0.0
+            }
         }
+        
+        if characteristic.uuid == CBUUID(string: "2A26") {
+            if let version = String(data: data, encoding: .utf8) {
+//                print("\(name) device name")
+                self.deviceName = "\(peripheral.name ?? "") - v\(version)"
+            }
+        }
+        
     }
     
     func peripheral(_ peripheral: CBPeripheral, didWriteValueFor characteristic: CBCharacteristic, error: Error?) {
@@ -245,6 +292,15 @@ extension BluetoothLEController: CBPeripheralDelegate {
                 }
                 
             }
+        }
+    }
+    
+    func floatFromData(_ data: Data) -> Float? {
+        guard data.count >= 4 else { return nil }
+        return data.withUnsafeBytes { rawBufferPointer in
+            let ptr = rawBufferPointer.bindMemory(to: Float.self)
+            // リトルエンディアン想定の場合
+            return Float(bitPattern: ptr[0].bitPattern)
         }
     }
 }
