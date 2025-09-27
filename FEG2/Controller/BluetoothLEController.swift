@@ -28,6 +28,9 @@ class BluetoothLEController: NSObject, ObservableObject {
     @Published var bleState: BLE_CON_STATUS = .DISCONNECTED
     @Published var bluetooth_ON: Bool = false
     @Published var deviceName: String = "デバイス未接続"
+    @AppStorage("brightness") private var sliderVal = 2
+    @AppStorage("calibration_f") private var calibration_f = 0.0
+    @AppStorage("calibration_s") private var calibration_s = 0.0
     
     private var centralManager: CBCentralManager?
     private var peripheral: CBPeripheral?
@@ -98,6 +101,7 @@ extension BluetoothLEController: CBCentralManagerDelegate {
         self.carib_f_characteristic = nil
         self.carib_s_characteristic = nil
         self.brightness_characteristic = nil
+        self.deviceName = "デバイス未接続"
         bleState = .DISCONNECTED
     }
     
@@ -204,12 +208,15 @@ extension BluetoothLEController: CBPeripheralDelegate {
                 if characteristic.uuid == CBUUID(string: Constants.CHARACTERISTIC_UUID_BRIGHTNESS) {
                     print("brightness found chara")
                     self.brightness_characteristic = characteristic
+                    peripheral.readValue(for: characteristic)
                 }
                 if characteristic.uuid == CBUUID(string: Constants.CHARACTERISTIC_UUID_F_CARIB) {
                     self.carib_f_characteristic = characteristic
+                    peripheral.readValue(for: characteristic)
                 }
                 if characteristic.uuid == CBUUID(string: Constants.CHARACTERISTIC_UUID_S_CARIB) {
                     self.carib_s_characteristic = characteristic
+                    peripheral.readValue(for: characteristic)
                 }
             }
             
@@ -254,10 +261,33 @@ extension BluetoothLEController: CBPeripheralDelegate {
         
         if characteristic.uuid == CBUUID(string: "2A26") {
             if let version = String(data: data, encoding: .utf8) {
-//                print("\(name) device name")
+                //                print("\(name) device name")
                 self.deviceName = "\(peripheral.name ?? "") - v\(version)"
             }
         }
+        
+        if characteristic.uuid == CBUUID(string: Constants.CHARACTERISTIC_UUID_BRIGHTNESS) {
+            if let data = characteristic.value, data.count >= 1 {
+                let value = data[0]
+                print("UInt8: \(value)")
+                sliderVal = Int(value)
+            }
+        }
+        
+        if characteristic.uuid == CBUUID(string: Constants.CHARACTERISTIC_UUID_F_CARIB) {
+            if let data = characteristic.value, data.count >= 1 {
+                let int8Value = Int8(bitPattern: data[0])
+                calibration_f = Double(Float(Int(int8Value)) / 10)
+            }
+        }
+        
+        if characteristic.uuid == CBUUID(string: Constants.CHARACTERISTIC_UUID_S_CARIB) {
+            if let data = characteristic.value, data.count >= 1 {
+                let int8Value = Int8(bitPattern: data[0])
+                calibration_s = Double(Float(Int(int8Value)) / 10)
+            }
+        }
+        
         
     }
     
@@ -266,6 +296,25 @@ extension BluetoothLEController: CBPeripheralDelegate {
             print("Write failed: \(error)")
         } else {
             print("Write success!")
+            
+            if characteristic.uuid == CBUUID(string: Constants.CHARACTERISTIC_UUID_BRIGHTNESS) {
+                if (self.brightness_characteristic != nil) {
+                    peripheral.readValue(for: self.brightness_characteristic!)
+                }
+            }
+            
+            if characteristic.uuid == CBUUID(string: Constants.CHARACTERISTIC_UUID_F_CARIB) {
+                if (self.carib_f_characteristic != nil) {
+                    peripheral.readValue(for: self.carib_f_characteristic!)
+                }
+                
+            }
+            
+            if characteristic.uuid == CBUUID(string: Constants.CHARACTERISTIC_UUID_S_CARIB) {
+                if (self.carib_s_characteristic != nil) {
+                    peripheral.readValue(for: self.carib_s_characteristic!)
+                }
+            }
         }
     }
     

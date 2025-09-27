@@ -26,8 +26,6 @@ struct ContentView: View {
     @State var currentTab: BottomNavItem = .graph
     
     @StateObject var tabOffset: TabOffset = TabOffset()
-//    @StateObject var minuteMemoryScroll = MinuteMemoryScroll()
-//    @StateObject var minuteMemoryScroll_LogDetailScreen = MinuteMemoryScroll()
     @StateObject var logDetailScreen: CurrentScreen = CurrentScreen()
     
     @AppStorage("screenMode") var screenMode: String = ScreenMode.system.rawValue

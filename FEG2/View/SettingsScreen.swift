@@ -20,7 +20,10 @@ struct SettingsScreen: View {
     @AppStorage("temp_max") private var max = 200
     @AppStorage("screenMode") var screenMode: String = ScreenMode.system.rawValue
     
-    @State var sliderVal = 2
+    @AppStorage("brightness") private var sliderVal = 2
+    @AppStorage("calibration_f") private var calibration_f = 0.0
+    @AppStorage("calibration_s") private var calibration_s = 0.0
+    
     
     @FocusState private var focused: Bool
     @FocusState private var focused2: Bool
@@ -121,11 +124,11 @@ struct SettingsScreen: View {
                     .disabled(bleController.bleState != .CONNECTED)
                 }
                 
-                SettingPanel(desc: "温度-1 キャリブレーション:0.0") {
+                SettingPanel(desc: "温度-1 キャリブレーション:\(String(format: "%.1f", calibration_f))") {
                     SettingTextField(focused: $focused,type: .TEMP_F)
                 }
                 Spacer().frame(height: 16)
-                SettingPanel(desc: "温度-2 キャリブレーション:0.0") {
+                SettingPanel(desc: "温度-2 キャリブレーション:\(String(format: "%.1f", calibration_s))") {
                     SettingTextField(focused: $focused2, type: .TEMP_S)
                 }
 
